@@ -3,7 +3,7 @@ variable "aws_region" {
 }
 
 variable "cluster_name" {
-  default = "my-eks-cluster"
+  default = "eks-dev-cluster"
 }
 
 variable "ssh_key_name" {}
