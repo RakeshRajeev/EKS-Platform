@@ -8,8 +8,8 @@ module "eks" {
   cluster_endpoint_public_access = true
   cluster_endpoint_private_access = true
 
-  node_groups = {
-    workers = {
+  eks_managed_node_groups = {
+    worker_nodes = {
       desired_capacity = 2
       max_capacity     = 3
       min_capacity     = 1
