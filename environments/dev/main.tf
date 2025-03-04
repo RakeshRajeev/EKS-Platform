@@ -41,6 +41,6 @@ module "addons" {
   karpenter_role_arn            = module.iam.karpenter_role_arn
   db_username                   = var.db_username
   db_password                   = var.db_password
-  rds_security_group_id         = module.vpc.rds_security_group_id
+  rds_security_group_id         = module.vpc.eks_security_group_id
   cert_manager_role_arn         = module.iam.cert_manager_role_arn
 }
