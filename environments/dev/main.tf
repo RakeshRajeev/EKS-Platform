@@ -30,6 +30,7 @@ module "eks" {
   eks_worker_role_arn   = module.iam.eks_worker_role_arn
   oidc_provider_arn     = module.eks.oidc_provider_arn
   aws_region            = var.aws_region
+  custom_ami_id         = var.custom_ami_id 
 }
 
 module "addons" {

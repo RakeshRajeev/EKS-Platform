@@ -5,3 +5,4 @@ ssh_key_name       = "dev-eks-ssh" # Replace with your key pair name
 environment        = "dev"
 db_username        = "postgres"
 db_password        = "Rake#1234"
+custom_ami_id      = "ami-eks"
