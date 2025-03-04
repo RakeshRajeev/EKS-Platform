@@ -13,3 +13,6 @@ variable "custom_ami_id" {
   type    = string
   default = null  # Optional, set to null if not using a custom AMI
 }
+variable "private_subnets" {
+  type = list(string)
+}
