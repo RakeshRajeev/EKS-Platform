@@ -29,7 +29,8 @@ module "eks" {
   environment           = var.environment
   eks_worker_role_arn   = module.iam.eks_worker_role_arn
   aws_region            = var.aws_region
-  custom_ami_id         = var.custom_ami_id 
+  custom_ami_id         = var.custom_ami_id
+  private_subnets       = module.vpc.private_subnets 
 }
 
 module "addons" {
@@ -44,4 +45,5 @@ module "addons" {
   db_password                   = var.db_password
   rds_security_group_id         = module.vpc.eks_security_group_id
   cert_manager_role_arn         = module.iam.cert_manager_role_arn
+  private_subnets               = module.vpc.private_subnets
 }

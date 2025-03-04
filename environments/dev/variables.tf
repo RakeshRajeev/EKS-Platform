@@ -25,3 +25,8 @@ variable "db_username" {
 variable "db_password" {
   type = string
 }
+
+variable "custom_ami_id" {
+  type    = string
+  default = null
+}
