@@ -3,14 +3,13 @@ resource "aws_eks_node_group" "worker_nodes" {
   node_group_name = "${var.cluster_name}-worker-nodes"
   node_role_arn   = var.eks_worker_role_arn
   subnet_ids      = var.private_subnets
+  ami_id          = var.ami_id 
 
   scaling_config {
     desired_size = 3
     max_size     = 5
     min_size     = 1
   }
-  
-  ami_id         = var.ami_id 
 
   remote_access {
     ec2_ssh_key               = var.ssh_key_name

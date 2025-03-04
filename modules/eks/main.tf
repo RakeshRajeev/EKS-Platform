@@ -17,7 +17,7 @@ module "eks" {
       min_capacity     = 1
       instance_types   = ["t3.medium"]
       key_name         = var.ssh_key_name
-      ami_id           = var.custom_ami_id  # Use `ami_id`, not `custom_ami_id`
+      ami_id           = var.ami_id  # Use `ami_id`, not `custom_ami_id`
     }
   }
 }
