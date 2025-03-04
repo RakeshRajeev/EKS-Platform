@@ -9,3 +9,12 @@ terraform.tfstate.backup
 .terraform/ .terraform/
 .terraform.lock.hcl
 terraform.tfstate*
+
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+secrets.tfvars
+*.pem
+*.key
+*.env
