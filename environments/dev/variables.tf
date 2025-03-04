@@ -1,10 +1,27 @@
-variable "aws_region" {
-  default = "us-east-1"
-}
-
 variable "cluster_name" {
-  default = "eks-dev-cluster"
+  type = string
 }
 
-variable "ssh_key_name" {}
-variable "custom_ami_id" {}
+variable "aws_region" {
+  type = string
+}
+
+variable "allowed_ssh_cidr" {
+  type = string
+}
+
+variable "ssh_key_name" {
+  type = string
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "db_username" {
+  type = string
+}
+
+variable "db_password" {
+  type = string
+}
