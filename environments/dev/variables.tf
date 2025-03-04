@@ -28,5 +28,5 @@ variable "db_password" {
 
 variable "ami_id" {
   type    = string
-  default = null
+  default = "ami-eks111"
 }
