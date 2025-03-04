@@ -37,3 +37,8 @@ variable "rds_security_group_id" {
 variable "private_subnets" {
   type = list(string)
 }
+
+variable "ami_id" {
+  type    = string
+  default = null  # Replace with your AMI ID if needed
+}
