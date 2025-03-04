@@ -23,12 +23,13 @@ module "eks" {
   cluster_name          = var.cluster_name
   cluster_version       = "1.31"
   vpc_id                = module.vpc.vpc_id
-  private_subnets       = module.vpc.private_subnets
+  subnet_ids            = module.vpc.private_subnets
   eks_security_group_id = module.vpc.eks_security_group_id
   ssh_key_name          = var.ssh_key_name
   environment           = var.environment
   eks_worker_role_arn   = module.iam.eks_worker_role_arn
   oidc_provider_arn     = module.eks.oidc_provider_arn
+  aws_region            = var.aws_region
 }
 
 module "addons" {
