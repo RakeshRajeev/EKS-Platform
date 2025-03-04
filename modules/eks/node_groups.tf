@@ -10,8 +10,7 @@ resource "aws_eks_node_group" "worker_nodes" {
     min_size     = 1
   }
   
-  ami_type       = "CUSTOM"
-  custom_ami_id  = var.custom_ami_id
+  ami_id         = var.ami_id 
 
   remote_access {
     ec2_ssh_key               = var.ssh_key_name
