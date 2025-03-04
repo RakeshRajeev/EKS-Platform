@@ -21,14 +21,14 @@ module "eks" {
   source = "../../modules/eks"
 
   cluster_name          = var.cluster_name
-  cluster_version       = "1.24"
+  cluster_version       = "1.31"
   vpc_id                = module.vpc.vpc_id
   private_subnets       = module.vpc.private_subnets
   eks_security_group_id = module.vpc.eks_security_group_id
   ssh_key_name          = var.ssh_key_name
   environment           = var.environment
   eks_worker_role_arn   = module.iam.eks_worker_role_arn
-  oidc_provider_arn = module.eks.oidc_provider_arn
+  oidc_provider_arn     = module.eks.oidc_provider_arn
 }
 
 module "addons" {
@@ -42,8 +42,5 @@ module "addons" {
   db_username                   = var.db_username
   db_password                   = var.db_password
   rds_security_group_id         = module.vpc.rds_security_group_id
-  aws_lb_controller_role_arn = module.iam.aws_lb_controller_role_arn
-  cert_manager_role_arn      = module.iam.cert_manager_role_arn
-  cluster_autoscaler_role_arn = module.iam.cluster_autoscaler_role_arn
-  karpenter_role_arn          = module.iam.karpenter_role_arn
+  cert_manager_role_arn         = module.iam.cert_manager_role_arn
 }
