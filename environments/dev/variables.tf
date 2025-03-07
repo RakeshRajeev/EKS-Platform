@@ -31,6 +31,7 @@ variable "db_password" {
 variable "ami_id" {
   description = "The AMI ID to use for the EKS worker nodes"
   type        = string
+  default     = null  # Make the variable optional
 }
 
 variable "iam_role_names" {

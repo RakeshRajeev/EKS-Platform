@@ -48,6 +48,16 @@ module "eks" {
       ami_id           = data.aws_ami.eks_node.id  # Option 1: Dynamic AMI lookup
       # ami_id         = var.ami_id                # Option 2: Static AMI from terraform.tfvars
       # END: AMI configuration block
+
+      # Add these configurations
+      subnet_ids     = var.private_subnets
+      instance_types = ["t3.medium"]
+      
+      # Add proper IAM configuration
+      iam_role_arn   = var.eks_worker_role_arn
+      
+      # Add proper security group configuration
+      vpc_security_group_ids = [var.node_security_group_id]
     }
   }
 }
@@ -67,6 +77,11 @@ resource "aws_iam_openid_connect_provider" "eks" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
   url             = module.eks.cluster_oidc_issuer_url
+
+  lifecycle {
+    ignore_changes = [thumbprint_list]
+    prevent_destroy = true
+  }
 }
 
 # Create IAM role without inline policy
@@ -84,6 +99,10 @@ resource "aws_iam_role" "eks_cluster" {
       }
     ]
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Create separate policy

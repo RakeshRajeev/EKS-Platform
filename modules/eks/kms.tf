@@ -41,4 +41,9 @@ resource "aws_kms_key" "eks" {
 resource "aws_kms_alias" "eks" {
   name          = "alias/eks/${var.cluster_name}"
   target_key_id = aws_kms_key.eks.key_id
+
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes = [target_key_id]
+  }
 }

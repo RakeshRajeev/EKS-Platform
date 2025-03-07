@@ -58,6 +58,7 @@ variable "iam_role_names" {
 variable "ami_id" {
   description = "The AMI ID to use for the EKS worker nodes"
   type        = string
+  default     = null  # Make the variable optional
 }
 
 variable "eks_worker_role_arn" {
