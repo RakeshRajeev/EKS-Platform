@@ -10,6 +10,29 @@ module "eks" {
   cluster_endpoint_public_access  = true
   cluster_endpoint_private_access = true
 
+  # Override the default IAM role creation to avoid using deprecated inline_policy
+  create_iam_role = false
+  iam_role_arn    = aws_iam_role.eks_cluster.arn
+
+  # Fix KMS encryption configuration format
+  cluster_encryption_config = {
+    resources = ["secrets"]
+    provider_key_arn = aws_kms_key.eks.arn
+  }
+
+  # Add cluster addons configuration
+  cluster_addons = {
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+    coredns = {
+      most_recent = true
+    }
+  }
+
   eks_managed_node_groups = {
     worker_nodes = {
       desired_capacity = 2
@@ -22,6 +45,13 @@ module "eks" {
   }
 }
 
+# Get current AWS account ID
+data "aws_caller_identity" "current" {}
+
+// Remove the following KMS resources as they are now in kms.tf
+// resource "aws_kms_key" "eks" { ... }
+// resource "aws_kms_alias" "eks" { ... }
+
 data "tls_certificate" "eks" {
   url = module.eks.cluster_oidc_issuer_url
 }
@@ -32,8 +62,9 @@ resource "aws_iam_openid_connect_provider" "eks" {
   url             = module.eks.cluster_oidc_issuer_url
 }
 
-resource "aws_iam_role" "this" {
-  name = "${var.cluster_name}-eks-role"
+# Create IAM role without inline policy
+resource "aws_iam_role" "eks_cluster" {
+  name = "${var.cluster_name}-eks-cluster-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -46,19 +77,33 @@ resource "aws_iam_role" "this" {
       }
     ]
   })
-
-  lifecycle {
-    ignore_changes = [inline_policy]
-  }
 }
 
-resource "aws_iam_role_policy" "eks_policy" {
-  name = "${var.cluster_name}-eks-policy"
-  role = aws_iam_role.this.id
+# Create separate policy
+resource "aws_iam_role_policy" "eks_cluster_policy" {
+  name = "${var.cluster_name}-eks-cluster-policy"
+  role = aws_iam_role.eks_cluster.id
   policy = var.inline_policy
 }
 
-resource "aws_iam_role_policies_exclusive" "this" {
-  role_name    = aws_iam_role.this.name
-  policy_names = [aws_iam_role_policy.eks_policy.name]
+# Ensure exclusive policy management
+resource "aws_iam_role_policies_exclusive" "eks_cluster" {
+  role_name    = aws_iam_role.eks_cluster.name
+  policy_names = [aws_iam_role_policy.eks_cluster_policy.name]
 }
+
+# Add required policies for EKS cluster
+resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.eks_cluster.name
+}
+
+resource "aws_iam_role_policy_attachment" "eks_service_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  role       = aws_iam_role.eks_cluster.name
+}
+
+// Remove or comment out the deprecated configuration
+// resource "aws_iam_role" "this" { ... }
+// resource "aws_iam_role_policy" "eks_policy" { ... }
+// resource "aws_iam_role_policies_exclusive" "this" { ... }
