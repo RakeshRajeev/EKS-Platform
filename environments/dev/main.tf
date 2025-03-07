@@ -30,7 +30,8 @@ module "eks" {
   eks_worker_role_arn   = module.iam.eks_worker_role_arn
   aws_region            = var.aws_region
   ami_id                = var.ami_id
-  private_subnets       = module.vpc.private_subnets 
+  private_subnets       = module.vpc.private_subnets
+  node_security_group_id = module.vpc.node_security_group_id 
 }
 
 module "addons" {
