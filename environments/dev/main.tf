@@ -72,14 +72,10 @@ resource "aws_iam_role" "eks_override" {
   assume_role_policy = data.aws_iam_policy_document.eks_assume_role_policy.json
 }
 
-resource "aws_iam_policy" "eks_override" {
+// Update IAM roles and policies to use aws_iam_role_policy
+resource "aws_iam_role_policy" "eks_override" {
   for_each = toset(var.iam_role_names)
-  name   = "${each.value}-eks-policy"
-  policy = file("${path.module}/../../policies/eks-inline-policy.json")
-}
-
-resource "aws_iam_role_policy_attachment" "eks_override" {
-  for_each = toset(var.iam_role_names)
-  role       = aws_iam_role.eks_override[each.key].name
-  policy_arn = aws_iam_policy.eks_override[each.key].arn
+  name     = "${each.value}-eks-policy"
+  role     = aws_iam_role.eks_override[each.key].id
+  policy   = file("${path.module}/../../policies/eks-inline-policy.json")
 }
