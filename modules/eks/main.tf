@@ -7,8 +7,10 @@ module "eks" {
   vpc_id          = var.vpc_id
   subnet_ids      = var.subnet_ids
 
-  cluster_endpoint_public_access  = true
-  cluster_endpoint_private_access = true
+  # Configure cluster endpoint access
+  cluster_endpoint_public_access       = true
+  cluster_endpoint_private_access      = true
+  cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
 
   # Override the default IAM role creation to avoid using deprecated inline_policy
   create_iam_role = false
@@ -20,18 +22,8 @@ module "eks" {
     provider_key_arn = aws_kms_key.eks.arn
   }
 
-  # Add cluster addons configuration
-  cluster_addons = {
-    kube-proxy = {
-      most_recent = true
-    }
-    vpc-cni = {
-      most_recent = true
-    }
-    coredns = {
-      most_recent = true
-    }
-  }
+  # Disable built-in addons since we're managing them separately
+  cluster_addons = {}
 
   eks_managed_node_groups = {
     worker_nodes = {

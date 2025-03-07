@@ -48,3 +48,9 @@ variable "inline_policy" {
   type        = string
   default     = null
 }
+
+variable "enable_aws_lb_controller" {
+  description = "Enable AWS Load Balancer Controller addon"
+  type        = bool
+  default     = true
+}

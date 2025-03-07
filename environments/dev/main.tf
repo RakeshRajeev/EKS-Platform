@@ -1,8 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-  profile= "my-profile"
-}
-
 module "vpc" {
   source = "../../modules/vpc"
 
@@ -42,6 +37,13 @@ module "eks" {
 
 module "addons" {
   source = "../../modules/addons"
+  
+  depends_on = [module.eks]  # Add explicit dependency
+
+  providers = {
+    kubernetes = kubernetes
+    helm       = helm
+  }
 
   cluster_name                  = var.cluster_name
   aws_region                    = var.aws_region
@@ -53,6 +55,7 @@ module "addons" {
   rds_security_group_id         = module.vpc.eks_security_group_id
   cert_manager_role_arn         = module.iam.cert_manager_role_arn
   private_subnets               = module.vpc.private_subnets
+  logging_role_arn              = module.iam.logging_role_arn
 }
 
 // Manage IAM roles and policies separately

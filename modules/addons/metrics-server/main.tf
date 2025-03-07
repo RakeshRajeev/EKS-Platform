@@ -1,12 +1,12 @@
 resource "helm_release" "metrics_server" {
   name       = "metrics-server"
+  namespace  = "kube-system"
   repository = "https://kubernetes-sigs.github.io/metrics-server/"
   chart      = "metrics-server"
-  version    = "3.8.2"
-  namespace  = "kube-system"
+  version    = "3.10.0"
 
   set {
     name  = "args[0]"
-    value = "--kubelet-insecure-tls"
+    value = "--kubelet-preferred-address-types=InternalIP"
   }
 }

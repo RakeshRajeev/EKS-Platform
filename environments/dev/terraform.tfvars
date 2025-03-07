@@ -8,3 +8,4 @@ db_password        = "Rake#1234"
 ami_id             = "ami-eks111"
 iam_role_names     = ["eks-role-1"]
 eks_worker_role_arn = "arn:aws:iam::123456789012:role/eks-worker-role"
+enable_aws_lb_controller = true  # Add this line to enable the AWS Load Balancer Controller
