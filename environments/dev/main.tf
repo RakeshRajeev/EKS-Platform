@@ -1,8 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-  profile= "my-profile"
-}
-
 module "vpc" {
   source = "../../modules/vpc"
 
@@ -33,15 +28,20 @@ module "eks" {
   ssh_key_name          = var.ssh_key_name
   environment           = var.environment
   eks_worker_role_arn   = module.iam.eks_worker_role_arn
-  aws_region            = var.aws_region
   ami_id                = var.ami_id
   private_subnets       = module.vpc.private_subnets
   node_security_group_id = module.vpc.node_security_group_id 
   inline_policy         = file("${path.module}/../../policies/eks-inline-policy.json")
+  iam_role_names        = var.iam_role_names
 }
 
 module "addons" {
   source = "../../modules/addons"
+
+  providers = {
+    kubernetes = kubernetes
+    helm       = helm
+  }
 
   cluster_name                  = var.cluster_name
   aws_region                    = var.aws_region
@@ -53,4 +53,7 @@ module "addons" {
   rds_security_group_id         = module.vpc.eks_security_group_id
   cert_manager_role_arn         = module.iam.cert_manager_role_arn
   private_subnets               = module.vpc.private_subnets
+  logging_role_arn              = module.iam.logging_role_arn
+
+  depends_on = [module.eks]
 }

@@ -51,7 +51,7 @@ variable "enable_logging" {
 }
 
 variable "iam_role_names" {
-  description = "List of IAM role names for the EKS cluster"
+  description = "List of IAM role names for EKS"
   type        = list(string)
 }
 
