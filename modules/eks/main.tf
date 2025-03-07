@@ -46,10 +46,19 @@ resource "aws_iam_role" "this" {
       }
     ]
   })
+
+  lifecycle {
+    ignore_changes = [inline_policy]
+  }
 }
 
 resource "aws_iam_role_policy" "eks_policy" {
   name = "${var.cluster_name}-eks-policy"
   role = aws_iam_role.this.id
   policy = var.inline_policy
+}
+
+resource "aws_iam_role_policies_exclusive" "this" {
+  role_name    = aws_iam_role.this.name
+  policy_names = [aws_iam_role_policy.eks_policy.name]
 }
