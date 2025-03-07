@@ -1,4 +1,3 @@
-
 .terraform/
 .terraform.lock.hcl
 terraform.tfstate
@@ -18,3 +17,12 @@ secrets.tfvars
 *.pem
 *.key
 *.env
+
+# Ignore backend preparation
+**/backend-prep.tf
+
+# Other standard terraform ignores
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
