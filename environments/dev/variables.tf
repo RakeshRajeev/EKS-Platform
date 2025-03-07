@@ -1,5 +1,6 @@
 variable "cluster_name" {
-  type = string
+  description = "The name of the EKS cluster"
+  type        = string
 }
 
 variable "aws_region" {
@@ -11,7 +12,8 @@ variable "allowed_ssh_cidr" {
 }
 
 variable "ssh_key_name" {
-  type = string
+  description = "The SSH key name to use for the EKS worker nodes"
+  type        = string
 }
 
 variable "environment" {
@@ -27,6 +29,22 @@ variable "db_password" {
 }
 
 variable "ami_id" {
-  type    = string
-  default = "ami-eks111"
+  description = "The AMI ID to use for the EKS worker nodes"
+  type        = string
+}
+
+variable "iam_role_names" {
+  description = "List of IAM role names for the EKS cluster"
+  type        = list(string)
+}
+
+variable "eks_worker_role_arn" {
+  description = "The ARN of the EKS worker role"
+  type        = string
+}
+
+variable "inline_policy" {
+  description = "IAM inline policy for the EKS role"
+  type        = string
+  default     = null
 }
