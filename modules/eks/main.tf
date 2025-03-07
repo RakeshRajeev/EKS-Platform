@@ -1,3 +1,15 @@
+# BEGIN: Dynamic AMI lookup block - Remove this block if you want to use static AMI from terraform.tfvars
+data "aws_ami" "eks_node" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amazon-eks-node-${var.cluster_version}-v*"]
+  }
+}
+# END: Dynamic AMI lookup block
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 19.0"
@@ -32,7 +44,10 @@ module "eks" {
       min_capacity     = 1
       instance_types   = ["t3.medium"]
       key_name         = var.ssh_key_name
-      ami_id           = var.ami_id
+      # BEGIN: AMI configuration block - Use only one of these options:
+      ami_id           = data.aws_ami.eks_node.id  # Option 1: Dynamic AMI lookup
+      # ami_id         = var.ami_id                # Option 2: Static AMI from terraform.tfvars
+      # END: AMI configuration block
     }
   }
 }
