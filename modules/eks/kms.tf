@@ -44,6 +44,9 @@ resource "aws_kms_alias" "eks" {
 
   lifecycle {
     prevent_destroy = true
-    ignore_changes = [target_key_id]
+    ignore_changes = [
+      target_key_id,
+      name
+    ]
   }
 }

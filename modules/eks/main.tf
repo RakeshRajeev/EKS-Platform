@@ -102,6 +102,10 @@ resource "aws_iam_role" "eks_cluster" {
 
   lifecycle {
     prevent_destroy = true
+    ignore_changes = [
+      name,
+      assume_role_policy
+    ]
   }
 }
 
@@ -110,6 +114,10 @@ resource "aws_iam_role_policy" "eks_cluster_policy" {
   name = "${var.cluster_name}-eks-cluster-policy"
   role = aws_iam_role.eks_cluster.id
   policy = var.inline_policy
+
+  lifecycle {
+    ignore_changes = [policy]
+  }
 }
 
 # Ensure exclusive policy management
