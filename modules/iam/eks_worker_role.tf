@@ -1,5 +1,5 @@
-# Create basic worker role
-resource "aws_iam_role" "worker_role" {
+# Main worker role definition
+resource "aws_iam_role" "eks_worker_role" {
   name = "${var.cluster_name}-worker-role"
 
   assume_role_policy = jsonencode({
@@ -12,20 +12,21 @@ resource "aws_iam_role" "worker_role" {
       }
     }]
   })
+
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
 
-# Attach required AWS managed policies
-resource "aws_iam_role_policy_attachment" "worker_node_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.worker_role.name
-}
+# Single policy attachment block for all policies
+resource "aws_iam_role_policy_attachment" "eks_worker_policies" {
+  for_each = toset([
+    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  ])
 
-resource "aws_iam_role_policy_attachment" "cni_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.worker_role.name
-}
-
-resource "aws_iam_role_policy_attachment" "ecr_readonly" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.worker_role.name
+  policy_arn = each.value
+  role       = aws_iam_role.eks_worker_role.name
 }

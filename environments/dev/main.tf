@@ -17,20 +17,14 @@ module "iam" {
 module "eks" {
   source = "../../modules/eks"
 
-  cluster_name          = var.cluster_name
+  cluster_name           = var.cluster_name
   cluster_version       = "1.31"
   vpc_id                = module.vpc.vpc_id
   subnet_ids            = module.vpc.private_subnets
   eks_security_group_id = module.vpc.eks_security_group_id
-  ssh_key_name          = var.ssh_key_name
-  environment           = var.environment
-  eks_worker_role_arn   = module.iam.worker_role_arn  # Changed from worker_role_arn to eks_worker_role_arn
+  eks_worker_role_arn   = module.iam.worker_role_arn  # Using the correct output
   private_subnets       = module.vpc.private_subnets
-  node_security_group_id = module.vpc.node_security_group_id 
-  inline_policy         = file("${path.module}/../../policies/eks-inline-policy.json")
-  iam_role_names        = var.iam_role_names
-
-  depends_on = [module.iam]
+  node_security_group_id = module.vpc.node_security_group_id
 }
 
 module "addons" {
@@ -41,16 +35,19 @@ module "addons" {
     helm       = helm
   }
 
-  # Required arguments
-  cluster_name = var.cluster_name
-  aws_region   = var.aws_region
-  vpc_id       = module.vpc.vpc_id
+  cluster_name                = var.cluster_name
+  aws_region                 = var.aws_region
+  vpc_id                     = module.vpc.vpc_id
+  private_subnets            = module.vpc.private_subnets
+  cluster_endpoint           = module.eks.cluster_endpoint
+  eks_oidc_provider_arn      = module.eks.oidc_provider_arn
+  karpenter_role_arn         = try(module.iam.karpenter_role_arn, null)
 
-  # Optional arguments
-  private_subnets       = module.vpc.private_subnets
-  cluster_endpoint      = module.eks.cluster_endpoint
-  eks_oidc_provider_arn = module.eks.oidc_provider_arn
-  karpenter_role_arn    = try(module.iam.karpenter_role_arn, null)
+  # Add RDS configuration
+  enable_rds           = true
+  db_username         = var.db_username
+  db_password         = var.db_password
+  rds_security_group_id = module.vpc.rds_security_group_id
 
   depends_on = [module.eks]
 }

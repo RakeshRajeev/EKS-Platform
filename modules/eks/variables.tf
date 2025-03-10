@@ -40,8 +40,9 @@ variable "eks_security_group_id" {
 }
 
 variable "inline_policy" {
-  description = "IAM inline policy for the EKS role"
+  description = "Inline policy for EKS cluster role"
   type        = string
+  default     = ""  # Make it optional with empty default
 }
 
 variable "enable_logging" {
@@ -51,8 +52,9 @@ variable "enable_logging" {
 }
 
 variable "iam_role_names" {
-  description = "List of IAM role names for EKS"
+  description = "List of IAM role names"
   type        = list(string)
+  default     = []  # Make it optional with empty default
 }
 
 variable "ami_id" {
@@ -67,6 +69,13 @@ variable "eks_worker_role_arn" {
 }
 
 variable "environment" {
-  description = "The environment for the EKS cluster"
+  description = "Environment name"
   type        = string
+  default     = "dev"  # Make it optional with default value
+}
+
+variable "tags" {
+  description = "Additional tags for the node group"
+  type        = map(string)
+  default     = {}
 }

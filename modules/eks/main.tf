@@ -1,4 +1,4 @@
-# Simple AMI lookup
+# BEGIN: Dynamic AMI lookup block - Remove this block if you want to use static AMI from terraform.tfvars
 data "aws_ami" "eks_node" {
   most_recent = true
   owners      = ["amazon"]
@@ -8,8 +8,12 @@ data "aws_ami" "eks_node" {
     values = ["amazon-eks-node-${var.cluster_version}-v*"]
   }
 }
+# END: Dynamic AMI lookup block
 
-# Create EKS Cluster
+# Remove the module "eks" block since it's creating a duplicate cluster
+# Instead, use only the direct resource creation
+
+# EKS Cluster
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   version  = var.cluster_version
@@ -19,29 +23,25 @@ resource "aws_eks_cluster" "main" {
     subnet_ids              = var.subnet_ids
     endpoint_private_access = true
     endpoint_public_access  = true
+    security_group_ids      = [var.eks_security_group_id]
+  }
+
+  # Add lifecycle rule to prevent recreation
+  lifecycle {
+    prevent_destroy = false
+    ignore_changes = [
+      version
+    ]
   }
 }
 
-# Get OIDC thumbprint for the provider
-data "tls_certificate" "eks" {
-  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
-}
-
-# Create OIDC Provider for the cluster
-resource "aws_iam_openid_connect_provider" "eks" {
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
-  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
-
-  depends_on = [aws_eks_cluster.main]
-}
-
-# Create Node Group
+# Node Group with proper dependencies
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "main"
-  node_role_arn   = var.eks_worker_role_arn
-  subnet_ids      = var.subnet_ids
+  node_role_arn   = var.eks_worker_role_arn  # This should be from eks_worker_role
+  subnet_ids      = var.private_subnets
+  instance_types  = ["t3.medium"]
 
   scaling_config {
     desired_size = 2
@@ -49,17 +49,39 @@ resource "aws_eks_node_group" "main" {
     min_size     = 1
   }
 
-  instance_types = ["t3.medium"]
-  ami_type       = "AL2_x86_64"
+  depends_on = [aws_eks_cluster.main]
 
-  tags = {
-    Environment = var.environment
+  lifecycle {
+    ignore_changes = [scaling_config[0].desired_size]
   }
 }
 
-# Basic IAM role for cluster
+// Get current AWS account ID
+data "aws_caller_identity" "current" {}
+
+// Remove the following KMS resources as they are now in kms.tf
+// resource "aws_kms_key" "eks" { ... }
+// resource "aws_kms_alias" "eks" { ... }
+
+// Remove this duplicate OIDC provider
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+# Single OIDC Provider definition - remove any other OIDC provider definitions
+resource "aws_iam_openid_connect_provider" "eks" {
+  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+
+  lifecycle {
+    ignore_changes = [thumbprint_list]
+  }
+}
+
+# Basic cluster role - removing inline policy configurations
 resource "aws_iam_role" "eks_cluster" {
-  name = "${var.cluster_name}-cluster-role"
+  name = "${var.cluster_name}-eks-cluster-role"
   
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -73,8 +95,18 @@ resource "aws_iam_role" "eks_cluster" {
   })
 }
 
-# Attach required policies
+# Keep only the essential policy attachment
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.eks_cluster.name
 }
+
+// Remove these redundant resources:
+// - aws_iam_role_policy
+// - aws_iam_role_policies_exclusive
+// - aws_iam_role_policy_attachment "eks_service_policy"
+
+// Remove or comment out the deprecated configuration
+// resource "aws_iam_role" "this" { ... }
+// resource "aws_iam_role_policy" "eks_policy" { ... }
+// resource "aws_iam_role_policies_exclusive" "this" { ... }

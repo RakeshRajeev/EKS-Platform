@@ -65,6 +65,7 @@ module "karpenter" {
   count  = var.enable_karpenter ? 1 : 0
 
   cluster_name       = var.cluster_name
-  karpenter_role_arn = var.karpenter_role_arn
-  cluster_endpoint   = var.cluster_endpoint
+  aws_region        = var.aws_region
+  cluster_endpoint  = var.cluster_endpoint != null ? var.cluster_endpoint : ""
+  karpenter_role_arn = var.karpenter_role_arn != null ? var.karpenter_role_arn : ""
 }
