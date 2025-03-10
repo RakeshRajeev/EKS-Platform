@@ -1,6 +1,22 @@
 resource "aws_iam_role" "cluster_autoscaler_role" {
-  name = "${var.cluster_name}-cluster-autoscaler-role"
-  assume_role_policy = data.aws_iam_policy_document.eks_assume_role_policy.json
+  count = var.create_oidc_roles ? 1 : 0
+  name  = "${var.cluster_name}-cluster-autoscaler-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = var.oidc_provider_arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${trimprefix(var.oidc_provider, "https://")}:sub": "system:serviceaccount:kube-system:cluster-autoscaler"
+        }
+      }
+    }]
+  })
 }
 
 resource "aws_iam_policy" "cluster_autoscaler" {
@@ -26,10 +42,7 @@ resource "aws_iam_policy" "cluster_autoscaler" {
 }
 
 resource "aws_iam_role_policy_attachment" "cluster_autoscaler_policy_attachment" {
-  role       = aws_iam_role.cluster_autoscaler_role.name
+  count      = var.create_oidc_roles ? 1 : 0
+  role       = aws_iam_role.cluster_autoscaler_role[0].name
   policy_arn = aws_iam_policy.cluster_autoscaler.arn
-}
-
-output "cluster_autoscaler_role_arn" {
-  value = aws_iam_role.cluster_autoscaler_role.arn
 }

@@ -13,12 +13,14 @@ module "cluster_autoscaler" {
 }
 
 module "aws_lb_controller" {
-  source = "./aws-lb-controller"
   count  = var.enable_aws_lb_controller ? 1 : 0
+  source = "./aws-lb-controller"
 
   cluster_name              = var.cluster_name
   aws_region               = var.aws_region
   aws_lb_controller_role_arn = var.aws_lb_controller_role_arn
+  vpc_id                   = var.vpc_id
+  eks_oidc_provider_arn    = var.eks_oidc_provider_arn  # Now properly referenced
 }
 
 module "cert_manager" {
@@ -64,4 +66,5 @@ module "karpenter" {
 
   cluster_name       = var.cluster_name
   karpenter_role_arn = var.karpenter_role_arn
+  cluster_endpoint   = var.cluster_endpoint
 }

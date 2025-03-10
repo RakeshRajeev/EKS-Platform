@@ -7,23 +7,16 @@ resource "helm_release" "karpenter" {
 
   create_namespace = true
 
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = var.karpenter_role_arn
-  }
-
-  set {
-    name  = "settings.aws.clusterName"
-    value = var.cluster_name
-  }
-
-  set {
-    name  = "settings.aws.defaultInstanceProfile"
-    value = var.cluster_name
-  }
-
-  set {
-    name  = "settings.aws.interruptionQueueName"
-    value = var.cluster_name
+  dynamic "set" {
+    for_each = {
+      "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn" = var.karpenter_role_arn
+      "clusterName"    = var.cluster_name
+      "clusterEndpoint" = var.cluster_endpoint
+      "aws.defaultInstanceProfile" = var.cluster_name
+    }
+    content {
+      name  = set.key
+      value = set.value
+    }
   }
 }

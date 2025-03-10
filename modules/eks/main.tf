@@ -1,4 +1,4 @@
-# BEGIN: Dynamic AMI lookup block - Remove this block if you want to use static AMI from terraform.tfvars
+# Simple AMI lookup
 data "aws_ami" "eks_node" {
   most_recent = true
   owners      = ["amazon"]
@@ -8,136 +8,73 @@ data "aws_ami" "eks_node" {
     values = ["amazon-eks-node-${var.cluster_version}-v*"]
   }
 }
-# END: Dynamic AMI lookup block
 
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "~> 19.0"
+# Create EKS Cluster
+resource "aws_eks_cluster" "main" {
+  name     = var.cluster_name
+  version  = var.cluster_version
+  role_arn = aws_iam_role.eks_cluster.arn
 
-  cluster_name    = var.cluster_name
-  cluster_version = "1.31"
-  vpc_id          = var.vpc_id
-  subnet_ids      = var.subnet_ids
-
-  # Configure cluster endpoint access
-  cluster_endpoint_public_access       = true
-  cluster_endpoint_private_access      = true
-  cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
-
-  # Override the default IAM role creation to avoid using deprecated inline_policy
-  create_iam_role = false
-  iam_role_arn    = aws_iam_role.eks_cluster.arn
-
-  # Fix KMS encryption configuration format
-  cluster_encryption_config = {
-    resources = ["secrets"]
-    provider_key_arn = aws_kms_key.eks.arn
-  }
-
-  # Disable built-in addons since we're managing them separately
-  cluster_addons = {}
-
-  eks_managed_node_groups = {
-    worker_nodes = {
-      desired_capacity = 2
-      max_capacity     = 3
-      min_capacity     = 1
-      instance_types   = ["t3.medium"]
-      key_name         = var.ssh_key_name
-      # BEGIN: AMI configuration block - Use only one of these options:
-      ami_id           = data.aws_ami.eks_node.id  # Option 1: Dynamic AMI lookup
-      # ami_id         = var.ami_id                # Option 2: Static AMI from terraform.tfvars
-      # END: AMI configuration block
-
-      # Add these configurations
-      subnet_ids     = var.private_subnets
-      instance_types = ["t3.medium"]
-      
-      # Add proper IAM configuration
-      iam_role_arn   = var.eks_worker_role_arn
-      
-      # Add proper security group configuration
-      vpc_security_group_ids = [var.node_security_group_id]
-    }
+  vpc_config {
+    subnet_ids              = var.subnet_ids
+    endpoint_private_access = true
+    endpoint_public_access  = true
   }
 }
 
-# Get current AWS account ID
-data "aws_caller_identity" "current" {}
-
-// Remove the following KMS resources as they are now in kms.tf
-// resource "aws_kms_key" "eks" { ... }
-// resource "aws_kms_alias" "eks" { ... }
-
+# Get OIDC thumbprint for the provider
 data "tls_certificate" "eks" {
-  url = module.eks.cluster_oidc_issuer_url
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
 }
 
+# Create OIDC Provider for the cluster
 resource "aws_iam_openid_connect_provider" "eks" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
-  url             = module.eks.cluster_oidc_issuer_url
+  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
 
-  lifecycle {
-    ignore_changes = [thumbprint_list]
-    prevent_destroy = true
+  depends_on = [aws_eks_cluster.main]
+}
+
+# Create Node Group
+resource "aws_eks_node_group" "main" {
+  cluster_name    = aws_eks_cluster.main.name
+  node_group_name = "main"
+  node_role_arn   = var.eks_worker_role_arn
+  subnet_ids      = var.subnet_ids
+
+  scaling_config {
+    desired_size = 2
+    max_size     = 3
+    min_size     = 1
+  }
+
+  instance_types = ["t3.medium"]
+  ami_type       = "AL2_x86_64"
+
+  tags = {
+    Environment = var.environment
   }
 }
 
-# Create IAM role without inline policy
+# Basic IAM role for cluster
 resource "aws_iam_role" "eks_cluster" {
-  name = "${var.cluster_name}-eks-cluster-role"
+  name = "${var.cluster_name}-cluster-role"
+  
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "eks.amazonaws.com"
-        }
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "eks.amazonaws.com"
       }
-    ]
+    }]
   })
-
-  lifecycle {
-    prevent_destroy = true
-    ignore_changes = [
-      name,
-      assume_role_policy
-    ]
-  }
 }
 
-# Create separate policy
-resource "aws_iam_role_policy" "eks_cluster_policy" {
-  name = "${var.cluster_name}-eks-cluster-policy"
-  role = aws_iam_role.eks_cluster.id
-  policy = var.inline_policy
-
-  lifecycle {
-    ignore_changes = [policy]
-  }
-}
-
-# Ensure exclusive policy management
-resource "aws_iam_role_policies_exclusive" "eks_cluster" {
-  role_name    = aws_iam_role.eks_cluster.name
-  policy_names = [aws_iam_role_policy.eks_cluster_policy.name]
-}
-
-# Add required policies for EKS cluster
+# Attach required policies
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.eks_cluster.name
 }
-
-resource "aws_iam_role_policy_attachment" "eks_service_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  role       = aws_iam_role.eks_cluster.name
-}
-
-// Remove or comment out the deprecated configuration
-// resource "aws_iam_role" "this" { ... }
-// resource "aws_iam_role_policy" "eks_policy" { ... }
-// resource "aws_iam_role_policies_exclusive" "this" { ... }

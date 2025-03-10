@@ -1,6 +1,22 @@
 resource "aws_iam_role" "aws_lb_controller_role" {
-  name = "${var.cluster_name}-aws-lb-controller-role"
-  assume_role_policy = data.aws_iam_policy_document.eks_assume_role_policy.json
+  count = var.create_oidc_roles ? 1 : 0
+  name  = "${var.cluster_name}-aws-lb-controller-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = var.oidc_provider_arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${trimprefix(var.oidc_provider, "https://")}:sub": "system:serviceaccount:kube-system:aws-load-balancer-controller"
+        }
+      }
+    }]
+  })
 }
 
 resource "aws_iam_policy" "aws_lb_controller" {
@@ -29,10 +45,7 @@ resource "aws_iam_policy" "aws_lb_controller" {
 }
 
 resource "aws_iam_role_policy_attachment" "aws_lb_controller" {
-  role       = aws_iam_role.aws_lb_controller_role.name
+  count      = var.create_oidc_roles ? 1 : 0
+  role       = aws_iam_role.aws_lb_controller_role[0].name
   policy_arn = aws_iam_policy.aws_lb_controller.arn
-}
-
-output "aws_lb_controller_role_arn" {
-  value = aws_iam_role.aws_lb_controller_role.arn
 }

@@ -1,27 +1,25 @@
 resource "helm_release" "fluent_bit" {
-  name       = "fluent-bit"
-  namespace  = "logging"
-  repository = "https://fluent.github.io/helm-charts"
-  chart      = "fluent-bit"
-  version    = "0.20.6"
-
+  name             = "fluent-bit"
+  namespace        = "logging"
+  repository       = "https://fluent.github.io/helm-charts"
+  chart            = "fluent-bit"
+  version          = "0.20.6"
   create_namespace = true
 
-  set {
-    name  = "config.outputs"
-    value = <<EOF
-[OUTPUT]
-    Name cloudwatch
-    Match *
-    region ${var.aws_region}
-    log_group_name /aws/eks/${var.cluster_name}/logs
-    log_stream_prefix fluent-bit-
-    auto_create_group true
-EOF
-  }
+  values = [
+    <<-EOT
+    serviceAccount:
+      create: true
+      annotations:
+        eks.amazonaws.com/role-arn: ${var.logging_role_arn}
+    EOT
+  ]
 
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = var.logging_role_arn
+  dynamic "set" {
+    for_each = var.logging_role_arn != "" ? [1] : []
+    content {
+      name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+      value = var.logging_role_arn
+    }
   }
 }

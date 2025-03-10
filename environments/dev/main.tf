@@ -11,10 +11,7 @@ module "vpc" {
 
 module "iam" {
   source = "../../modules/iam"
-
   cluster_name = var.cluster_name
-  oidc_provider_arn   = module.eks.oidc_provider_arn
-  oidc_provider       = module.eks.oidc_issuer_url
 }
 
 module "eks" {
@@ -27,12 +24,13 @@ module "eks" {
   eks_security_group_id = module.vpc.eks_security_group_id
   ssh_key_name          = var.ssh_key_name
   environment           = var.environment
-  eks_worker_role_arn   = module.iam.eks_worker_role_arn
-  ami_id                = var.ami_id
+  eks_worker_role_arn   = module.iam.worker_role_arn  # Changed from worker_role_arn to eks_worker_role_arn
   private_subnets       = module.vpc.private_subnets
   node_security_group_id = module.vpc.node_security_group_id 
   inline_policy         = file("${path.module}/../../policies/eks-inline-policy.json")
   iam_role_names        = var.iam_role_names
+
+  depends_on = [module.iam]
 }
 
 module "addons" {
@@ -43,17 +41,16 @@ module "addons" {
     helm       = helm
   }
 
-  cluster_name                  = var.cluster_name
-  aws_region                    = var.aws_region
-  cluster_autoscaler_role_arn   = module.iam.cluster_autoscaler_role_arn
-  aws_lb_controller_role_arn    = module.iam.aws_lb_controller_role_arn
-  karpenter_role_arn            = module.iam.karpenter_role_arn
-  db_username                   = var.db_username
-  db_password                   = var.db_password
-  rds_security_group_id         = module.vpc.eks_security_group_id
-  cert_manager_role_arn         = module.iam.cert_manager_role_arn
-  private_subnets               = module.vpc.private_subnets
-  logging_role_arn              = module.iam.logging_role_arn
+  # Required arguments
+  cluster_name = var.cluster_name
+  aws_region   = var.aws_region
+  vpc_id       = module.vpc.vpc_id
+
+  # Optional arguments
+  private_subnets       = module.vpc.private_subnets
+  cluster_endpoint      = module.eks.cluster_endpoint
+  eks_oidc_provider_arn = module.eks.oidc_provider_arn
+  karpenter_role_arn    = try(module.iam.karpenter_role_arn, null)
 
   depends_on = [module.eks]
 }

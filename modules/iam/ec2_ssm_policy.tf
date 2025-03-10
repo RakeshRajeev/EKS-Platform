@@ -4,7 +4,8 @@ resource "aws_iam_policy" "ec2_ssm_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "ssm" {
-  role       = aws_iam_role.eks_worker_role.name
+  count      = var.create_worker_role ? 1 : 0
+  role       = aws_iam_role.worker_role.name  # Changed from eks_worker_role
   policy_arn = aws_iam_policy.ec2_ssm_policy.arn
 }
 

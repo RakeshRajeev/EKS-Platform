@@ -1,13 +1,31 @@
-resource "aws_iam_role" "eks_worker_role" {
-  name = "${var.cluster_name}-eks-worker-role"
-  assume_role_policy = data.aws_iam_policy_document.eks_assume_role_policy.json
+# Create basic worker role
+resource "aws_iam_role" "worker_role" {
+  name = "${var.cluster_name}-worker-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+  })
 }
 
-resource "aws_iam_role_policy_attachment" "eks_worker_role_policy_attachment" {
-  role       = aws_iam_role.eks_worker_role.name
-  policy_arn = aws_iam_policy.eks_worker_node_policy.arn
+# Attach required AWS managed policies
+resource "aws_iam_role_policy_attachment" "worker_node_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.worker_role.name
 }
 
-output "eks_worker_role_arn" {
-  value = aws_iam_role.eks_worker_role.arn
+resource "aws_iam_role_policy_attachment" "cni_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.worker_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "ecr_readonly" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.worker_role.name
 }

@@ -62,7 +62,7 @@ variable "ami_id" {
 }
 
 variable "eks_worker_role_arn" {
-  description = "The ARN of the EKS worker role"
+  description = "ARN of the EKS worker role"
   type        = string
 }
 

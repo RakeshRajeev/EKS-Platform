@@ -1,6 +1,19 @@
 resource "aws_iam_role" "logging_role" {
-  name = "${var.cluster_name}-logging-role"
-  assume_role_policy = data.aws_iam_policy_document.eks_assume_role_policy.json
+  count = var.create_oidc_roles && var.oidc_provider_arn != "" ? 1 : 0
+  name  = "${var.cluster_name}-logging-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
 }
 
 resource "aws_iam_policy" "logging_policy" {
@@ -29,10 +42,7 @@ resource "aws_iam_policy" "logging_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "logging_policy_attachment" {
-  role       = aws_iam_role.logging_role.name
+  count      = var.create_oidc_roles && var.oidc_provider_arn != "" ? 1 : 0
+  role       = aws_iam_role.logging_role[count.index].name
   policy_arn = aws_iam_policy.logging_policy.arn
-}
-
-output "logging_role_arn" {
-  value = aws_iam_role.logging_role.arn
 }

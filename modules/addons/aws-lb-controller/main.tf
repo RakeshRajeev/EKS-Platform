@@ -3,12 +3,7 @@ resource "helm_release" "aws_load_balancer_controller" {
   namespace  = "kube-system"
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
-  version    = "1.5.3"
-
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = var.aws_lb_controller_role_arn
-  }
+  version    = "1.4.4"
 
   set {
     name  = "clusterName"
@@ -16,7 +11,7 @@ resource "helm_release" "aws_load_balancer_controller" {
   }
 
   set {
-    name  = "region"
-    value = var.aws_region
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = var.aws_lb_controller_role_arn
   }
 }

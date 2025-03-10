@@ -8,45 +8,58 @@ variable "aws_region" {
   type        = string
 }
 
+variable "vpc_id" {
+  description = "ID of the VPC"
+  type        = string
+}
+
 variable "cluster_autoscaler_role_arn" {
   description = "ARN of the Cluster Autoscaler IAM role"
   type        = string
+  default     = ""
 }
 
 variable "aws_lb_controller_role_arn" {
   description = "ARN of the AWS Load Balancer Controller IAM role"
   type        = string
+  default     = ""
 }
 
 variable "karpenter_role_arn" {
   description = "ARN of the Karpenter IAM role"
   type        = string
+  default     = null
 }
 
 variable "cert_manager_role_arn" {
   description = "ARN of the Cert Manager IAM role"
   type        = string
+  default     = ""
 }
 
 variable "db_username" {
   description = "Database username"
   type        = string
+  default     = null
 }
 
 variable "db_password" {
   description = "Database password"
   type        = string
+  default     = null
   sensitive   = true
 }
 
 variable "rds_security_group_id" {
   description = "ID of the RDS security group"
   type        = string
+  default     = null
 }
 
 variable "private_subnets" {
   description = "List of private subnet IDs"
   type        = list(string)
+  default     = []
 }
 
 variable "ami_id" {
@@ -111,4 +124,17 @@ variable "enable_logging" {
 variable "logging_role_arn" {
   description = "ARN of the logging IAM role"
   type        = string
+  default     = ""
+}
+
+variable "cluster_endpoint" {
+  description = "Endpoint of the EKS cluster"
+  type        = string
+  default     = null
+}
+
+variable "eks_oidc_provider_arn" {
+  description = "ARN of the EKS OIDC provider"
+  type        = string
+  default     = null
 }

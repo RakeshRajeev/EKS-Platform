@@ -1,6 +1,22 @@
 resource "aws_iam_role" "cert_manager_role" {
-  name = "${var.cluster_name}-cert-manager-role"
-  assume_role_policy = data.aws_iam_policy_document.eks_assume_role_policy.json
+  count = var.create_oidc_roles ? 1 : 0
+  name  = "${var.cluster_name}-cert-manager-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = var.oidc_provider_arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${trimprefix(var.oidc_provider, "https://")}:sub": "system:serviceaccount:cert-manager:cert-manager"
+        }
+      }
+    }]
+  })
 }
 
 resource "aws_iam_policy" "cert_manager" {
@@ -22,10 +38,7 @@ resource "aws_iam_policy" "cert_manager" {
 }
 
 resource "aws_iam_role_policy_attachment" "cert_manager_policy_attachment" {
-  role       = aws_iam_role.cert_manager_role.name
+  count      = var.create_oidc_roles ? 1 : 0
+  role       = aws_iam_role.cert_manager_role[0].name
   policy_arn = aws_iam_policy.cert_manager.arn
-}
-
-output "cert_manager_role_arn" {
-  value = aws_iam_role.cert_manager_role.arn
 }
