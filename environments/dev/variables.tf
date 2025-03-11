@@ -55,3 +55,20 @@ variable "enable_aws_lb_controller" {
   type        = bool
   default     = true
 }
+
+variable "cert_manager_email" {
+  description = "Email address for Let's Encrypt notifications"
+  type        = string
+}
+
+variable "db_name" {
+  description = "Name of the database"
+  type        = string
+  default     = "eksdb"
+}
+
+variable "enable_rds" {
+  description = "Whether to enable RDS"
+  type        = bool
+  default     = false
+}

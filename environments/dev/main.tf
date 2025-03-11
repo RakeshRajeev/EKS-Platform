@@ -31,8 +31,9 @@ module "addons" {
   source = "../../modules/addons"
 
   providers = {
-    kubernetes = kubernetes
-    helm       = helm
+    kubernetes.this = kubernetes
+    helm.this      = helm.this
+    kubectl.this   = kubectl.this
   }
 
   cluster_name                = var.cluster_name
@@ -48,6 +49,9 @@ module "addons" {
   db_username         = var.db_username
   db_password         = var.db_password
   rds_security_group_id = module.vpc.rds_security_group_id
+
+  enable_cert_manager = true
+  cert_manager_email = "your-email@example.com"  # Add this variable
 
   depends_on = [module.eks]
 }

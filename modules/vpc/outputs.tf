@@ -21,3 +21,8 @@ output "node_security_group_id" {
 output "cluster_security_group_id" {
   value = aws_security_group.eks_cluster.id
 }
+
+output "rds_security_group_id" {
+  description = "ID of RDS security group"
+  value       = aws_security_group.rds.id
+}

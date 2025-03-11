@@ -1,7 +1,7 @@
 resource "aws_db_instance" "main" {
   identifier        = "${var.cluster_name}-db"
   engine           = "postgres"
-  engine_version   = "13.7"
+  engine_version   = "12.15"  # Changed to definitely supported version
   instance_class   = "db.t3.micro"
   allocated_storage = 20
 

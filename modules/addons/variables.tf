@@ -138,3 +138,15 @@ variable "eks_oidc_provider_arn" {
   type        = string
   default     = null
 }
+
+variable "cert_manager_email" {
+  description = "Email address for Let's Encrypt notifications"
+  type        = string
+  default     = null
+}
+
+variable "db_name" {
+  description = "Database name"
+  type        = string
+  default     = "eksdatabase"
+}

@@ -92,3 +92,28 @@ resource "aws_security_group" "nlb" {
     Name = "${var.cluster_name}-nlb-sg"
   }
 }
+
+# Add RDS security group
+resource "aws_security_group" "rds" {
+  name        = "${var.cluster_name}-rds-sg"
+  description = "Security group for RDS"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port       = 5432  # PostgreSQL port
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.eks_nodes.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.cluster_name}-rds-sg"
+  }
+}

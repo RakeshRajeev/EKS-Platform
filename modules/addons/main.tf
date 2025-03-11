@@ -24,10 +24,17 @@ module "aws_lb_controller" {
 }
 
 module "cert_manager" {
-  source = "./cert-manager"
   count  = var.enable_cert_manager ? 1 : 0
+  source = "./cert-manager"
+
+  providers = {
+    helm.this    = helm.this
+    kubectl.this = kubectl.this
+  }
 
   cert_manager_role_arn = var.cert_manager_role_arn
+  cert_manager_email    = var.cert_manager_email
+  aws_region           = var.aws_region
 }
 
 module "argocd" {
@@ -41,14 +48,15 @@ module "nginx_ingress" {
 }
 
 module "rds" {
-  source = "./rds"
   count  = var.enable_rds ? 1 : 0
+  source = "./rds"
 
-  cluster_name           = var.cluster_name
-  db_username           = var.db_username
-  db_password           = var.db_password
+  cluster_name          = var.cluster_name
+  db_username          = var.db_username
+  db_password          = var.db_password
+  db_name              = var.db_name
+  private_subnets      = var.private_subnets
   rds_security_group_id = var.rds_security_group_id
-  private_subnets       = var.private_subnets
 }
 
 module "logging" {
