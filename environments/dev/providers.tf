@@ -1,11 +1,11 @@
 terraform {
   required_providers {
     kubectl = {
-      source = "gavinbunney/kubectl"
+      source  = "gavinbunney/kubectl"
       version = ">= 1.14"
     }
     helm = {
-      source = "hashicorp/helm"
+      source  = "hashicorp/helm"
       version = ">= 2.5"
     }
   }
@@ -27,7 +27,7 @@ provider "kubernetes" {
 }
 
 provider "kubectl" {
-  alias = "this"  # Add alias for the provider
+  alias                  = "this" # Add alias for the provider
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
   exec {

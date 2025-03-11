@@ -31,7 +31,7 @@ variable "db_password" {
 variable "ami_id" {
   description = "The AMI ID to use for the EKS worker nodes"
   type        = string
-  default     = null  # Make the variable optional
+  default     = null # Make the variable optional
 }
 
 variable "iam_role_names" {
@@ -44,7 +44,7 @@ variable "eks_worker_role_arn" {
   type        = string
 }
 
-// Remove these variables as they're not needed
+// Need to remove these variables as they're not needed
 // variable "inline_policy" {
 //   description = "IAM inline policy for the EKS role"
 //   type        = string
