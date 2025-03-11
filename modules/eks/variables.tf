@@ -39,12 +39,6 @@ variable "eks_security_group_id" {
   type        = string
 }
 
-variable "inline_policy" {
-  description = "Inline policy for EKS cluster role"
-  type        = string
-  default     = ""  # Make it optional with empty default
-}
-
 variable "enable_logging" {
   description = "Enable logging for the EKS cluster"
   type        = bool

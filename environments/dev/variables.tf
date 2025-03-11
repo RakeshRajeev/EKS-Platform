@@ -44,11 +44,12 @@ variable "eks_worker_role_arn" {
   type        = string
 }
 
-variable "inline_policy" {
-  description = "IAM inline policy for the EKS role"
-  type        = string
-  default     = null
-}
+// Remove these variables as they're not needed
+// variable "inline_policy" {
+//   description = "IAM inline policy for the EKS role"
+//   type        = string
+//   default     = null
+// }
 
 variable "enable_aws_lb_controller" {
   description = "Enable AWS Load Balancer Controller addon"
