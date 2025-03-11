@@ -16,8 +16,8 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
-  profile= "my-profile"
+  region  = var.aws_region
+  profile = "my-profile"
 }
 
 provider "kubernetes" {
