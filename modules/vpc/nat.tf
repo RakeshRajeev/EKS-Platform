@@ -1,7 +1,7 @@
 # NAT Gateway resources
 resource "aws_eip" "nat" {
   count  = length(var.availability_zones)
-  domain = "vpc"  # Updated from vpc = true
+  domain = "vpc" # Updated from vpc = true
 
   tags = {
     Name = "${var.cluster_name}-nat-eip-${count.index + 1}"
@@ -17,5 +17,5 @@ resource "aws_nat_gateway" "main" {
     Name = "${var.cluster_name}-nat-${count.index + 1}"
   }
 
-  depends_on = [aws_internet_gateway.igw]  # Updated reference name
+  depends_on = [aws_internet_gateway.igw] # Updated reference name
 }
