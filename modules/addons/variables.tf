@@ -64,7 +64,7 @@ variable "private_subnets" {
 
 variable "ami_id" {
   type    = string
-  default = null  # Replace with your AMI ID if needed
+  default = null # Replace with your AMI ID if needed
 }
 
 variable "enable_metrics_server" {
