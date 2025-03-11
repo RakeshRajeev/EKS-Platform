@@ -3,7 +3,7 @@ aws_region         = "ap-south-1"  # or your preferred region
 allowed_ssh_cidr   = "203.0.113.0/32"  # Replace with your IP
 ssh_key_name       = "dev-eks-ssh" # Replace with your key pair name
 environment        = "dev"
-db_username        = "dbadmin"  # Changed from 'admin' to 'dbadmin'
+db_username        = "dbadmin"  # Db username 'dbadmin'
 db_password        = "your-secure-password"
 # Remove the ami_id line since we're using dynamic lookup
 iam_role_names     = ["eks-role-1"]

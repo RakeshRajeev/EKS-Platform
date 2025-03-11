@@ -26,7 +26,7 @@ resource "aws_eks_cluster" "main" {
     security_group_ids      = [var.eks_security_group_id]
   }
 
-  # Add lifecycle rule to prevent recreation
+  # Adding lifecycle rule to prevent recreation
   lifecycle {
     prevent_destroy = false
     ignore_changes = [
@@ -59,9 +59,7 @@ resource "aws_eks_node_group" "main" {
 // Get current AWS account ID
 data "aws_caller_identity" "current" {}
 
-// Remove the following KMS resources as they are now in kms.tf
-// resource "aws_kms_key" "eks" { ... }
-// resource "aws_kms_alias" "eks" { ... }
+
 
 // Remove this duplicate OIDC provider
 data "tls_certificate" "eks" {
@@ -100,13 +98,3 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.eks_cluster.name
 }
-
-// Remove these redundant resources:
-// - aws_iam_role_policy
-// - aws_iam_role_policies_exclusive
-// - aws_iam_role_policy_attachment "eks_service_policy"
-
-// Remove or comment out the deprecated configuration
-// resource "aws_iam_role" "this" { ... }
-// resource "aws_iam_role_policy" "eks_policy" { ... }
-// resource "aws_iam_role_policies_exclusive" "this" { ... }
