@@ -31,7 +31,7 @@ variable "node_security_group_id" {
 variable "ssh_key_name" {
   description = "The SSH key name to use for the EKS worker nodes"
   type        = string
-  default     = "dev-eks-ssh"  # Your EC2 key pair name
+  default     = "dev-eks-ssh" # Your EC2 key pair name
 }
 
 variable "eks_security_group_id" {
@@ -48,13 +48,13 @@ variable "enable_logging" {
 variable "iam_role_names" {
   description = "List of IAM role names"
   type        = list(string)
-  default     = []  # Make it optional with empty default
+  default     = [] # Make it optional with empty default
 }
 
 variable "ami_id" {
   description = "The AMI ID to use for the EKS worker nodes"
   type        = string
-  default     = null  # Make the variable optional
+  default     = null # Make the variable optional
 }
 
 variable "eks_worker_role_arn" {
@@ -65,7 +65,7 @@ variable "eks_worker_role_arn" {
 variable "environment" {
   description = "Environment name"
   type        = string
-  default     = "dev"  # Make it optional with default value
+  default     = "dev" # Make it optional with default value
 }
 
 variable "tags" {

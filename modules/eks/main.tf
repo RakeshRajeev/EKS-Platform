@@ -39,7 +39,7 @@ resource "aws_eks_cluster" "main" {
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "main"
-  node_role_arn   = var.eks_worker_role_arn  # This should be from eks_worker_role
+  node_role_arn   = var.eks_worker_role_arn # This should be from eks_worker_role
   subnet_ids      = var.private_subnets
   instance_types  = ["t3.medium"]
 
@@ -80,7 +80,7 @@ resource "aws_iam_openid_connect_provider" "eks" {
 # Basic cluster role - removing inline policy configurations
 resource "aws_iam_role" "eks_cluster" {
   name = "${var.cluster_name}-eks-cluster-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
