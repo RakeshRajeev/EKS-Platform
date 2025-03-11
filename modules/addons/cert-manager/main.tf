@@ -38,8 +38,8 @@ resource "helm_release" "cert_manager" {
 
 # Wait longer for cert-manager webhook to be ready
 resource "time_sleep" "wait_for_cert_manager" {
-  depends_on = [helm_release.cert_manager]
-  create_duration = "60s"  # Increased wait time
+  depends_on      = [helm_release.cert_manager]
+  create_duration = "60s" # Increased wait time
 }
 
 # Create cluster issuer
@@ -64,5 +64,5 @@ resource "kubectl_manifest" "cluster_issuer" {
             route53:
               region: ${var.aws_region}
   YAML
-  provider = kubectl.this  # Explicitly specify the provider
+  provider  = kubectl.this # Explicitly specify the provider
 }
