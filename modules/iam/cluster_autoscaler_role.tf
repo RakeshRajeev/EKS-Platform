@@ -12,7 +12,7 @@ resource "aws_iam_role" "cluster_autoscaler_role" {
       Action = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {
-          "${trimprefix(var.oidc_provider, "https://")}:sub": "system:serviceaccount:kube-system:cluster-autoscaler"
+          "${trimprefix(var.oidc_provider, "https://")}:sub" : "system:serviceaccount:kube-system:cluster-autoscaler"
         }
       }
     }]
@@ -26,8 +26,8 @@ resource "aws_iam_policy" "cluster_autoscaler" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect   = "Allow"
-      Action   = [
+      Effect = "Allow"
+      Action = [
         "autoscaling:DescribeAutoScalingGroups",
         "autoscaling:DescribeAutoScalingInstances",
         "autoscaling:DescribeLaunchConfigurations",

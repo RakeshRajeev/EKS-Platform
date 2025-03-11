@@ -12,7 +12,7 @@ resource "aws_iam_role" "cert_manager_role" {
       Action = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {
-          "${trimprefix(var.oidc_provider, "https://")}:sub": "system:serviceaccount:cert-manager:cert-manager"
+          "${trimprefix(var.oidc_provider, "https://")}:sub" : "system:serviceaccount:cert-manager:cert-manager"
         }
       }
     }]
@@ -26,8 +26,8 @@ resource "aws_iam_policy" "cert_manager" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect   = "Allow"
-      Action   = [
+      Effect = "Allow"
+      Action = [
         "route53:GetChange",
         "route53:ChangeResourceRecordSets",
         "route53:ListResourceRecordSets"

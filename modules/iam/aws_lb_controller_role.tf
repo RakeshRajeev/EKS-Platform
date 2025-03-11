@@ -12,7 +12,7 @@ resource "aws_iam_role" "aws_lb_controller_role" {
       Action = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {
-          "${trimprefix(var.oidc_provider, "https://")}:sub": "system:serviceaccount:kube-system:aws-load-balancer-controller"
+          "${trimprefix(var.oidc_provider, "https://")}:sub" : "system:serviceaccount:kube-system:aws-load-balancer-controller"
         }
       }
     }]

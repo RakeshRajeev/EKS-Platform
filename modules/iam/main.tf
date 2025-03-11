@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "eks_assume_role_policy" {
 # OIDC-dependent roles
 resource "aws_iam_role" "cluster_autoscaler" {
   count = var.create_oidc_provider_role ? 1 : 0
-  
+
   name = "${var.cluster_name}-cluster-autoscaler"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -32,7 +32,7 @@ resource "aws_iam_role" "cluster_autoscaler" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${trimprefix(var.oidc_provider, "https://")}:sub": "system:serviceaccount:kube-system:cluster-autoscaler"
+            "${trimprefix(var.oidc_provider, "https://")}:sub" : "system:serviceaccount:kube-system:cluster-autoscaler"
           }
         }
       }
